@@ -11,12 +11,16 @@ https://osf.io/wqsgr
 Place all downloaded files into the `Data/` folder.
 
 
+
+
 ## Installation
 Install all dependencies using the requirements file:
 ```bash
 pip install -r requirements.txt
 ```
 Depending on your system, Mayavi, PyQt, and VTK may require additional system packages.
+
+
 
 
 ## Repository Structure
@@ -33,11 +37,15 @@ project/
 ```
 
 
+
+
 ## Usage
 Run the main analysis scripts:
 python Code/Calibration_analysis.py
 python Code/CL_analysis.py
 All figures will be saved automatically in the Plotting/ folder.
+
+
 
 
 ## Notes
