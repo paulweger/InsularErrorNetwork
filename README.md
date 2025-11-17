@@ -42,7 +42,11 @@ All figures will be saved automatically in the Plotting/ folder.
 
 ## Notes
 • Preprocessing outputs are included for faster reproduction
+
 • Patient data are not included in the repository; download them from the link above
+
 • Brain visualization requires Mayavi (included in requirements)
+
 • For questions, please contact paul.weger@maastrichtuniversity.nl
+
 • Written and uploaded on the 17th of November 2025
