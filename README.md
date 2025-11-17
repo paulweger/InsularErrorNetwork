@@ -20,6 +20,7 @@ Depending on your system, Mayavi, PyQt, and VTK may require additional system pa
 
 
 ## Repository Structure
+```text
 project/
 ├── Data/                     # place downloaded data here
 ├── Code/                     # main analysis scripts
@@ -29,6 +30,7 @@ project/
 │   └── Functions/            # helper functions for plotting, calculations, utils
 ├── Plotting/                 # output figures and brain-plotting code
 └── requirements.txt          # dependency list
+```
 
 
 ## Usage
