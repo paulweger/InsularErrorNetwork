@@ -167,7 +167,8 @@ print(f"→ Saved sig. electrode percentage plot under Plotting/Fig3/sig_electro
 print(f"\nGrouping electrodes into ROI:")
 groupedResults_allElecs = group_error_results_by_roi(errorResults, t_thresh=0)        # All electrodes
 groupedResults_sig = group_error_results_by_roi(errorResults, t_thresh=2)        # Significant electrodes
-groupedResults_t4 = group_error_results_by_roi(errorResults, t_thresh=4) 
+# Change threshold to meaningful (significant after bonferroni per participant/strictest per participant)
+groupedResults_t4 = group_error_results_by_roi(errorResults, t_thresh=3.669) 
 
 # Error power comparisson and temporal dynamics
 dataframe_linMixedEffects = build_lmm_dataframe(errorResults)               # Build dataframe for LMM analysis  

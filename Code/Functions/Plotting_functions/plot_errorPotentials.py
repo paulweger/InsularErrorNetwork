@@ -538,7 +538,8 @@ def plot_tval_spectrogram(t_values, p_values, significant_mask, f, t):
         extent=[shifted_time[0], shifted_time[-1], f[0], f[-1]],
         vmin=-max_t_value, vmax=max_t_value
     )
-
+    # Find peak
+    print('Spectral peak is at %f' % shifted_time[np.where(t_values==np.max(t_values))[1]])
     # --- Time zero line ---
     ax.axvline(x=0, color='grey', linestyle='--', linewidth=1.5)
 
