@@ -300,18 +300,25 @@ def calculate_spectral_increase(groupedResults):
         general_all.append(gen_smooth)
         error_all.append(err_smooth)
 
-    # Combine electrodes
-    error_all = np.vstack(error_all)
-    general_all = np.vstack(general_all)
 
+    # Per region and combined
+    error_all.append(np.vstack(error_all))
+    general_all.append(np.vstack(general_all))
+    # Combine electrodes
+    #error_all = np.vstack(error_all)
+    #general_all = np.vstack(general_all)
+    mean_inc = []
+    sem_inc = []
+    sig_mask = []
+    for rNr, error in enumerate(error_all): 
     # Percent increase and mean/SEM
-    percent_increase = ((error_all - general_all) / general_all) * 100
-    mean_inc = np.mean(percent_increase, axis=0)
-    sem_inc  = np.std(percent_increase, axis=0) / np.sqrt(percent_increase.shape[0])
-    
-    # Statistical testing (different from 0)
-    t_stat, p_values = ttest_1samp(percent_increase, 0, axis=0)
-    sig_mask = p_values < 0.05
+        percent_increase = ((error - general_all[rNr]) / general_all[rNr]) * 100
+        mean_inc.append(np.mean(percent_increase, axis=0))
+        sem_inc.append((np.std(percent_increase, axis=0) / np.sqrt(percent_increase.shape[0])))
+        
+        # Statistical testing (different from 0)
+        t_stat, p_values = ttest_1samp(percent_increase, 0, axis=0)
+        sig_mask.append(p_values < 0.05)
 
     return f_err_sel, mean_inc, sem_inc, sig_mask
 

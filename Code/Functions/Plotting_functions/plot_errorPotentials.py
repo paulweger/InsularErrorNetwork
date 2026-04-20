@@ -453,6 +453,55 @@ def plot_power_change(freqs, spectral_mean, spectral_sem, sig_mask):
     plt.savefig(os.path.join(save_dir, "spectral_change.pdf"), bbox_inches='tight')
     plt.close(fig)
 
+def plot_power_change_regions(freqs, spectral_mean, spectral_sem, sig_mask):
+    """
+    Plot mean ± SEM percent power change (Error vs Correct) across electrodes per roi
+    and save to Plotting/Fig3/spectral_change_roi.pdf.
+    """
+    # Map ROIs to labels and colors
+    labels = ['Anterior insula', 'Prefrontal cortex', 'Central-parietal cortex']
+    colors = ['tab:blue', '#00B3B3', 'forestgreen']
+    # Plot
+    fig, ax = plt.subplots(figsize=(7, 2.6))
+    for roi in range(len(spectral_mean)):
+        ax.plot(freqs, spectral_mean[roi], color=colors[roi])
+        ax.fill_between(freqs, spectral_mean[roi] - spectral_sem[roi], spectral_mean[roi] + spectral_sem[roi], color=colors[roi], alpha=0.3)
+
+        # Significance line
+        y_sig = -20 - roi*2
+        sig_freqs = freqs[sig_mask[roi]]
+        for f in sig_freqs:
+            ax.plot([f - 2, f + 2], [y_sig, y_sig], color=colors[roi], linewidth=1.5)
+        starts = np.where(np.diff(np.concatenate(([0], sig_mask[roi].astype(int), [0]))) == 1)[0]
+        ends   = np.where(np.diff(np.concatenate(([0], sig_mask[roi].astype(int), [0]))) == -1)[0] - 1
+        for s, e in zip(starts, ends):
+            print(f"Significant from {freqs[s]:.0f} Hz to {freqs[e]:.0f} Hz")
+        print("Spectral peak: ", np.round(np.max(spectral_mean[roi]),1), "% at", freqs[np.argmax(spectral_mean[roi])], "Hz")
+
+    # Styling
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.axhline(0, color='grey', linestyle='--', linewidth=1.5)
+
+    ax.set_xlim(freqs[0], freqs[-1])
+    ax.set_xticks([4, 12, 30, 60, 100, 200])
+    ax.set_xticklabels([4, 12, 30, 60, 100, 200], fontsize=12)
+    ax.set_ylim(-25, 40)
+    ax.set_yticks([-20,-10, 0, 10, 20, 30])
+    ax.set_yticklabels([-20,-10, 0, 10, 20, 30], fontsize=12)
+    ax.tick_params(axis='x', which='both', length=0)
+    ax.tick_params(axis='y', which='both', length=0)
+
+    ax.set_ylabel('Power change (%)', fontsize=14)
+    ax.set_xlabel('Frequency (Hz)', fontsize=14)
+    ax.set_title('Frequency profile', fontsize=16, pad=10)
+    plt.tight_layout()
+
+    # Save
+    save_dir = os.path.join("Plotting", "Fig3")
+    os.makedirs(save_dir, exist_ok=True)
+    plt.savefig(os.path.join(save_dir, "spectral_change_roi.pdf"), bbox_inches='tight')
+    plt.close(fig)
 
 
 def plot_tval_spectrogram(t_values, p_values, significant_mask, f, t):
@@ -745,7 +794,7 @@ def plot_insula_kde(coord_vals, kde_all, kde_t2, kde_t4):
 
 
 
-def plot_motor_heatmap(hfa, lfa, moveprob, start_time=64.5, duration=20):
+def plot_motor_heatmap(hfa, lfa, moveprob, obstacle, lanechange_command, start_time=64.5, duration=20):
     """
     Plot binned HFA (top) + LFA (bottom) heatmap with movement probability overlay.
     Saves as 'Plotting/Fig2/predictions.pdf'.
@@ -778,26 +827,23 @@ def plot_motor_heatmap(hfa, lfa, moveprob, start_time=64.5, duration=20):
     move_t_rel = move_t[mask_full] - start_time
 
     # --- Plot ---
-    fig, ax1 = plt.subplots(figsize=(7.5, 4))
-    ax1.imshow(data, aspect='auto', cmap='turbo',
+    fig, ax1 = plt.subplots(2,figsize=(7.5, 4),gridspec_kw={'height_ratios': [5,1]},sharex='col')
+    ax1[0].imshow(data, aspect='auto', cmap='turbo',
                extent=[time_rel[0], time_rel[-1], 0, data.shape[0]],
                vmin=-3, vmax=5, origin='lower')
 
-    ax1.set_title("Real-time decoder predictions", fontsize=16)
-    ax1.set_xlabel("Time (s)", fontsize=14)
-    ax1.set_ylabel("Features", fontsize=14)
-    ax1.set_xlim(0, duration)
-    ax1.set_xticks([0, 5, 10, 15, 20])
-    ax1.set_xticklabels([0, 5, 10, 15, 20], fontsize=12)
-    ax1.set_yticks([hfa_bin.shape[1] // 2 + lfa_bin.shape[1], lfa_bin.shape[1] // 2])
-    ax1.set_yticklabels(['HFA', 'LFA'], rotation=90, va='center', fontsize=12)
-    ax1.tick_params(axis='x', length=0)
-    ax1.tick_params(axis='y', length=0)
+    ax1[0].set_title("Real-time decoder predictions", fontsize=16)
+    
+    ax1[0].set_ylabel("Features", fontsize=14)
+    ax1[0].set_yticks([hfa_bin.shape[1] // 2 + lfa_bin.shape[1], lfa_bin.shape[1] // 2])
+    ax1[0].set_yticklabels(['HFA', 'LFA'], rotation=90, va='center', fontsize=12)
+    ax1[0].tick_params(axis='x', length=0)
+    ax1[0].tick_params(axis='y', length=0)
     for s in ['top', 'right', 'left', 'bottom']:
-        ax1.spines[s].set_visible(False)
+        ax1[0].spines[s].set_visible(False)
 
     # --- Overlay movement probability (unbinned) ---
-    ax2 = ax1.twinx()
+    ax2 = ax1[0].twinx()
     moveprob_plot = 0.98 * moveprob + 0.01
     ax2.plot(move_t_rel, moveprob_plot, 'w-', lw=2.5, alpha=0.9)
     ax2.set_ylim(0, 1)
@@ -807,6 +853,20 @@ def plot_motor_heatmap(hfa, lfa, moveprob, start_time=64.5, duration=20):
     ax2.tick_params(axis='y', length=0)
     for s in ['top', 'right', 'left', 'bottom']:
         ax2.spines[s].set_visible(False)
+
+    # Add indicator for game situation
+    not_obstactle = obstacle!=1
+    lanes = np.stack([not_obstactle,obstacle])
+    lc = np.where(lanechange_command[int(x1*fs):int(x2*fs)])
+    ax1[1].matshow(lanes[:,int(x1*fs):int(x2*fs)],aspect='auto',cmap='gray',extent=[time_rel[0], time_rel[-1], 0, data.shape[0]])
+    ax1[1].vlines(lc[0]/fs,0,50,color='red')
+
+    ax1[1].set_yticks([])
+    ax1[1].tick_params(top=False, labeltop=False, bottom=True, labelbottom=True)
+    ax1[1].set_xlabel("Time (s)", fontsize=14)
+    ax1[1].set_xlim(0, duration)
+    ax1[1].set_xticks([0, 5, 10, 15, 20])
+    ax1[1].set_xticklabels([0, 5, 10, 15, 20], fontsize=12)
 
     plt.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)

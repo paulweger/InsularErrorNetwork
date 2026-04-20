@@ -103,7 +103,7 @@ for ppt in participants:
     # Plot decoder prediction over time for one exemplary patient
     if ppt == 'P01':
         hfa_chans, lfa_chans = top_corr_channels(hfa, lfa, moveprob)
-        plot_motor_heatmap(hfa[:, hfa_chans], lfa[:, lfa_chans], moveprob)
+        plot_motor_heatmap(hfa[:, hfa_chans], lfa[:, lfa_chans], moveprob,obstacle,lanechange_command)
         print("-> Plotted motor heatmap")
     
     
@@ -183,7 +183,10 @@ plot_peak_latencies(groupedResults_t4)
 # Frequency analysis of highly-responsive electrodes
 print(f"\nSpectral contributions:")
 f, spectral_mean, spectral_sem, sig_mask = calculate_spectral_increase(groupedResults_t4)
-plot_power_change(f, spectral_mean, spectral_sem, sig_mask)
+# Combined for all
+plot_power_change(f, spectral_mean[-1], spectral_sem[-1], sig_mask[-1])
+# Per region
+plot_power_change_regions(f, spectral_mean[:-1],spectral_sem[:-1],sig_mask[:-1])
 
 # Get spatial distribution across insula
 print("\nSpatial distribution of error-responsive electrodes in insula")
