@@ -858,9 +858,18 @@ def plot_motor_heatmap(hfa, lfa, moveprob, obstacle, lanechange_command, start_t
     # Add indicator for game situation
     not_obstactle = obstacle!=1
     lanes = np.stack([not_obstactle,obstacle])
-    lc = np.where(lanechange_command[int(x1*fs):int(x2*fs)])
-    ax1[1].matshow(lanes[:,int(x1*fs):int(x2*fs)],aspect='auto',cmap='gray',extent=[time_rel[0], time_rel[-1], 0, data.shape[0]])
-    ax1[1].vlines(lc[0]/fs,0,50,color='red')
+    lc = np.where(np.diff(lanechange_command[int(x1*fs):int(x2*fs)])>0)[0]
+
+    carblue = colors.LinearSegmentedColormap.from_list("",['#FFFFFFFF','#4a5c97ff'])
+    ax1[1].matshow(lanes[:,int(x1*fs):int(x2*fs)],aspect='auto',cmap=carblue,extent=[time_rel[0], time_rel[-1], 0, data.shape[0]])
+    ax1[1].vlines(lc/fs,12.5,37.5,color='#df080aff',linestyle='--')
+    last =0
+    lane = 0
+    lc = np.append(lc,duration*fs)
+    for seg in lc:
+        ax1[1].hlines(lane*25+12.5,last/fs,seg/fs,color='#df080aff',linestyle='--')
+        last = seg
+        lane=not(lane)
 
     ax1[1].set_yticks([])
     ax1[1].tick_params(top=False, labeltop=False, bottom=True, labelbottom=True)
