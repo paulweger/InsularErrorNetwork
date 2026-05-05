@@ -860,7 +860,7 @@ def plot_motor_heatmap(hfa, lfa, moveprob, obstacle, lanechange_command, start_t
     lanes = np.stack([not_obstactle,obstacle])
     lc = np.where(np.diff(lanechange_command[int(x1*fs):int(x2*fs)])>0)[0]
 
-    carblue = colors.LinearSegmentedColormap.from_list("",['#FFFFFFFF','#4a5c97ff'])
+    carblue = colors.LinearSegmentedColormap.from_list("",['#4a5c97ff','#FFFFFFFF'])
     ax1[1].matshow(lanes[:,int(x1*fs):int(x2*fs)],aspect='auto',cmap=carblue,extent=[time_rel[0], time_rel[-1], 0, data.shape[0]])
     ax1[1].vlines(lc/fs,12.5,37.5,color='#df080aff',linestyle='--')
     last =0
@@ -871,12 +871,18 @@ def plot_motor_heatmap(hfa, lfa, moveprob, obstacle, lanechange_command, start_t
         last = seg
         lane=not(lane)
 
-    ax1[1].set_yticks([])
+    ax1[1].set_yticks([12.5,37.5])
+    ax1[1].set_yticklabels(['Right', 'Left'], fontsize=12)
     ax1[1].tick_params(top=False, labeltop=False, bottom=True, labelbottom=True)
     ax1[1].set_xlabel("Time (s)", fontsize=14)
     ax1[1].set_xlim(0, duration)
     ax1[1].set_xticks([0, 5, 10, 15, 20])
     ax1[1].set_xticklabels([0, 5, 10, 15, 20], fontsize=12)
+    ax1[1].spines['left'].set_visible(False)
+    ax1[1].spines['right'].set_visible(False)
+    ax1[1].spines['top'].set_visible(False)
+    ax1[1].spines['bottom'].set_visible(False)
+
 
     plt.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)
