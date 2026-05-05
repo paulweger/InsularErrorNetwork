@@ -1,7 +1,7 @@
 #########################
 # This script takes the preprocessed closedloop data and analyzes it for error and behavior.
 # Written by P. Weger (paul.weger@maastrichtuniversity.nl)
-# 17th of November 2025
+# 27th of April 2026
 #########################
 
 # Libaries
@@ -33,7 +33,7 @@ fs = 1024
 
 # Loop over participants
 print(f"\n--------- Starting closed-loop error analysis ---------")
-avgSuccess, time_behavior, rollingBehavior = {}, {}, {}             # For accumulating behavioral results
+avgSuccess, time_behavior, rollingBehavior, sig_gameplay = {}, {}, {}, {}             # For accumulating behavioral results
 errorResults = {ppt: {} for ppt in participants}                    # Accumulate error analysis results
 for ppt in participants:
     print(f"\nParticipant {ppt}")
@@ -56,6 +56,7 @@ for ppt in participants:
     avgSuccess[ppt] = np.mean(behavior['trialSuccess'])
     time_behavior[ppt] = behavior['t']
     rollingBehavior[ppt] = behavior['avgPerformance']
+    sig_gameplay[ppt] = ttest_1samp(behavior['avgPerformance'],popmean=0.5)
 
     # Identify correct/erroneous lane changes
     player, obstacle, lanechange_command, moveprob = labels['Player_lane'], labels['Traffic_lane'], labels['Smoothed_command'], labels['MoveProb']
